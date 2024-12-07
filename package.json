@@ -1,0 +1,30 @@
+{
+  "name": "backend-vediotube",
+  "version": "1.0.0",
+  "description": "backend for vedioTube",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./src/index.js",
+    "dev": "nodemon ./src/index.js"
+  },
+  "keywords": [
+    "node",
+    "express",
+    "mangoose",
+    "backend"
+  ],
+  "author": "Aryan saud",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.7",
+    "prettier": "^3.4.2"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongoose": "^8.8.4"
+  }
+}
