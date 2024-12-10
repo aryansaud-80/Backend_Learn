@@ -61,14 +61,14 @@
   };
 
   userSchema.methods.generateAccessToken = function () {
-    jwt.sign(
+    return jwt.sign(
       {
         id: this._id,
-        email: this.email,
         username: this.username,
+        email: this.email,
       },
-      process.ACCESS_TOKEN_SECRET,
-      { expiresIn: process.ACCESS_TOKEN_LIFE }
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: process.env.ACCESS_TOKEN_LIFE }
     );
   };
 
@@ -76,8 +76,7 @@
     return jwt.sign(
       {
         id: this._id,
-        email: this.email,
-        username: this.username,
+
       },
       process.env.REFRESH_TOKEN_SECRET,
       { expiresIn: process.env.REFRESH_TOKEN_LIFE }

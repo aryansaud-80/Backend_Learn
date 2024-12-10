@@ -94,3 +94,41 @@ export const registerUser = asyncHandler(async (req, res, next) => {
     throw new ApiError(500, 'Error registering user');
   }
 });
+
+export const loginUser = asyncHandler(async(req, res, next) =>{
+  if(!req.body){
+    throw new ApiError(400, 'No data provided');
+  }
+
+  const {email, password} = req.body;
+
+  if([email, password].some((field) => field === '')){
+    throw new ApiError(400, 'All fields are required');
+  }
+
+  const user = await User.findOne({email});
+
+  if(!user){
+    throw new ApiError(404, 'User not found');
+  }
+
+  const isPasswordMatch = await user.comparePassword(password);
+
+  if(!isPasswordMatch){
+    throw new ApiError(401, 'Invalid Password');
+  }
+
+  const {accessToken, refreshToken} = await generateAccessAndRefreshToken(user._id);
+
+  // console.table({accessToken, refreshToken});
+
+  const option = {
+    httpOnly: true,
+    secure: false,
+  };
+
+  return res.status(200)
+  .cookie('refreshToken', refreshToken, option)
+  .cookie('accessToken', accessToken, option)
+  .json(new ApiResponse(200, {refreshToken, accessToken}, "Login successful"));
+})
