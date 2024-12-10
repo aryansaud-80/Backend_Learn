@@ -7,6 +7,20 @@ import {
   cloudinaryDelete,
 } from '../utilities/cloudinaryUpload.js';
 
+const generateAccessAndRefreshToken = async (userId) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  const accessToken = user.generateAccessToken();
+  const refreshToken = user.generateRefreshToken();
+
+  user.refreshToken = refreshToken;
+  await user.save({ validateBeforeSave: false });
+  return { accessToken, refreshToken };
+};
+
 export const registerUser = asyncHandler(async (req, res, next) => {
   if (!req.body) {
     throw new ApiError(400, 'No data provided');
