@@ -4,6 +4,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import healthcheckRouter from './routes/healthcheck.routes.js';
 import userRouter from './routes/users.routes.js';
+import dashboardRouter from './routes/dashboard.routes.js';
 
 dotenv.config({ path: './.env' });
 
@@ -17,5 +18,6 @@ app.use(cookieParser());
 
 app.use('/api/v1/healthcheck', healthcheckRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/dashboard', dashboardRouter);
 
 export default app;
