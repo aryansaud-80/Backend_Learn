@@ -1,4 +1,4 @@
 {
   "dotenv.enableAutocloaking": false,
-  "cSpell.words": ["healthcheck"]
+  "cSpell.words": ["healthcheck", "Imagelocalpath"]
 }
