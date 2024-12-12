@@ -89,11 +89,13 @@ export const getChannelStats = asyncHandler(async (req, res) => {
     }
   ]);
 
+  
+
   const info= {
-    TotalViews: VedioDetail[0]?.totalViews,
-    TotalVideo: VedioDetail[0]?.totalVideo,
-    TotalSubscribers: totalSubscribers[0]?.subscriber,
-    TotalLikes: totalLikes[0]?.likes
+    TotalViews: VedioDetail[0]?.totalViews || 0,
+    TotalVideo: VedioDetail[0]?.totalVideo ||0,
+    TotalSubscribers: totalSubscribers[0]?.subscriber || 0,
+    TotalLikes: totalLikes[0]?.likes || 0
   }
 
   return res.status(200).json(new ApiResponse(200, info, "Successfully get the channel stats"))
@@ -105,7 +107,7 @@ export const getChannelVideos = asyncHandler(async (req, res) => {
   }
 
   const allVideos = await Video.find({
-    owner: req.user?._id,
+    owner: new mongoose.Types.ObjectId(req.user._id),
   });
 
   // if (!allVideos.length) {
