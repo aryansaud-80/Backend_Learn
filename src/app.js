@@ -6,6 +6,7 @@ import healthcheckRouter from './routes/healthcheck.routes.js';
 import userRouter from './routes/users.routes.js';
 import dashboardRouter from './routes/dashboard.routes.js';
 import likesRouter from './routes/like.routes.js';
+import commentRouter from './routes/comment.routes.js';
 
 dotenv.config({ path: './.env' });
 
@@ -21,5 +22,6 @@ app.use('/api/v1/healthcheck', healthcheckRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/dashboard', dashboardRouter);
 app.use('/api/v1/likes', likesRouter);
+app.use("/api/v1/comments", commentRouter);
 
 export default app;
