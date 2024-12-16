@@ -97,7 +97,7 @@ export const toggleTweetLike = asyncHandler(async (req, res) => {
 });
 
 export const getLikedVideos = asyncHandler(async (req, res) => {
-  const userId = req.user._id;
+  const userId = req.user?._id;
 
   if (!userId) {
     throw new ApiError(401, 'Unauthorized');
@@ -105,7 +105,10 @@ export const getLikedVideos = asyncHandler(async (req, res) => {
 
   const likedVideos = await Like.aggregate([
     {
-      $match: { user: mongoose.Types.ObjectId(userId), video: { $ne: null } },
+      $match: {
+        user: new mongoose.Types.ObjectId(userId),
+        video: { $ne: null },
+      },
     },
     {
       $lookup: {
@@ -113,18 +116,39 @@ export const getLikedVideos = asyncHandler(async (req, res) => {
         localField: 'video',
         foreignField: '_id',
         as: 'video',
-      }
+        pipeline: [
+          {
+            $project: {
+              _id: 1,
+              title: 1,
+              thumbnail: 1,
+              views: 1,
+              duration: 1,
+              isPublished: 1,
+              owner: 1,
+              createdAt: 1,
+              updatedAt: 1,
+            },
+          },
+        ],
+      },
     },
     {
-      $unwind: '$video'
+      $unwind: '$video',
     },
     {
       $project: {
-        _id: 0,
-        video: 1
-      }
-    }
-  ])
+        _id: 1,
+        video: 1,
+      },
+    },
+  ]);
 
-  return res.status(200).json(new ApiResponse(200, likedVideos, 'Liked videos'));
+  if (!likedVideos.length) {
+    return res.status(200).json(new ApiResponse(200, [], 'No liked videos'));
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, likedVideos, 'Liked videos'));
 });
