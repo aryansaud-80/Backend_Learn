@@ -25,7 +25,6 @@ const videoSchema = Schema(
     },
     duration: {
       type: String,
-      required: true,
     },
     likes: {
       type: Number,
