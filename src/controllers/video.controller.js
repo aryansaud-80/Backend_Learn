@@ -154,7 +154,9 @@ const publishAVideo = asyncHandler(async (req, res) => {
       throw new ApiError(500, 'Failed to publish video');
     }
 
-    return res.status(201).json(new ApiResponse(201, video));
+    return res
+      .status(201)
+      .json(new ApiResponse(201, video, 'Video published successfully'));
   } catch (error) {
     if (videoFile) {
       await cloudinaryDelete(videoFile.public_id);
