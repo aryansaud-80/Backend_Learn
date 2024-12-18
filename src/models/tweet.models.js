@@ -5,7 +5,6 @@ const tweetSchema = Schema(
     content: {
       type: String,
       required: true,
-      maxlength: 280,
     },
     owner: {
       type: Schema.Types.ObjectId,

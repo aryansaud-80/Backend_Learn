@@ -1,8 +1,11 @@
 import mongoose, { isValidObjectId } from 'mongoose';
 import { Like } from '../models/likes.models.js';
+import { Video } from '../models/vedio.models.js';
 import { ApiResponse } from '../utilities/ApiResponse.js';
 import { ApiError } from '../utilities/ApiError.js';
 import { asyncHandler } from '../utilities/asyncHandler.js';
+
+//TODO Need to solve the issue with the like controller
 
 export const toggleVideoLike = asyncHandler(async (req, res, next) => {
   const { videoId } = req.params;
@@ -18,16 +21,31 @@ export const toggleVideoLike = asyncHandler(async (req, res, next) => {
   }
 
   try {
-    const alreadyLiked = await Like.findOne({ video: videoId, user: userId });
+    const alreadyLiked = await Like.findOne({
+      video: videoId,
+      likedBy: userId,
+    });
 
     if (alreadyLiked) {
-      await Like.findByIdAndDelete(alreadyLiked._id);
+      const isUnLiked = await Like.deleteOne({
+        video: videoId,
+        likedBy: userId,
+      });
+
+      if (!isUnLiked) {
+        await Video.updateOne({ _id: videoId }, { $inc: { likes: -1 } });
+      }
+
       return res
         .status(200)
-        .json(new ApiResponse(200, alreadyLiked, 'Like removed'));
+        .json(new ApiResponse(200, isUnLiked, 'Like removed'));
     }
 
-    const newLike = await Like.create({ video: videoId, user: userId });
+    const newLike = await Like.create({ video: videoId, likedBy: userId });
+
+    if (newLike) {
+      await Video.updateOne({ _id: videoId }, { $inc: { likes: 1 } });
+    }
 
     return res.status(200).json(new ApiResponse(200, newLike, 'Like added'));
   } catch (error) {
@@ -50,7 +68,7 @@ export const toggleCommentLike = asyncHandler(async (req, res, next) => {
   try {
     const alreadyLiked = await Like.findOne({
       comment: commentId,
-      user: userId,
+      likedBy: userId,
     });
 
     if (alreadyLiked) {
@@ -60,7 +78,7 @@ export const toggleCommentLike = asyncHandler(async (req, res, next) => {
         .json(new ApiResponse(200, alreadyLiked, 'Like removed'));
     }
 
-    const newLike = await Like.create({ comment: commentId, user: userId });
+    const newLike = await Like.create({ comment: commentId, likedBy: userId });
     return res.status(200).json(new ApiResponse(200, newLike, 'Like added'));
   } catch (error) {
     throw new ApiError(500, 'Internal server error');
@@ -80,7 +98,10 @@ export const toggleTweetLike = asyncHandler(async (req, res) => {
   }
 
   try {
-    const alreadyLiked = await Like.findOne({ tweet: tweetId, user: userId });
+    const alreadyLiked = await Like.findOne({
+      tweet: tweetId,
+      likedBy: userId,
+    });
     if (alreadyLiked) {
       await Like.findByIdAndDelete(alreadyLiked._id);
       return res
@@ -88,7 +109,7 @@ export const toggleTweetLike = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, alreadyLiked, 'Like removed'));
     }
 
-    const newLike = await Like.create({ tweet: tweetId, user: userId });
+    const newLike = await Like.create({ tweet: tweetId, likedBy: userId });
 
     return res.status(200).json(new ApiResponse(200, newLike, 'Like added'));
   } catch (error) {
@@ -106,7 +127,7 @@ export const getLikedVideos = asyncHandler(async (req, res) => {
   const likedVideos = await Like.aggregate([
     {
       $match: {
-        user: new mongoose.Types.ObjectId(userId),
+        likedBy: new mongoose.Types.ObjectId(userId),
         video: { $ne: null },
       },
     },
