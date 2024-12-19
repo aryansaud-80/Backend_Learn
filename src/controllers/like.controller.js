@@ -5,16 +5,16 @@ import { ApiResponse } from '../utilities/ApiResponse.js';
 import { ApiError } from '../utilities/ApiError.js';
 import { asyncHandler } from '../utilities/asyncHandler.js';
 
-//TODO Need to solve the issue with the like controller
+//FIXME: Need to solve the issue with the like controller
 
 export const toggleVideoLike = asyncHandler(async (req, res, next) => {
   const { videoId } = req.params;
 
   if (!isValidObjectId(videoId)) {
-    throw new ApiError(400, 'Invalid vedio ID');
+    throw new ApiError(400, 'Invalid video ID');
   }
 
-  const userId = req.user._id;
+  const userId = req.user?._id;
 
   if (!userId) {
     throw new ApiError(401, 'Unauthorized');
@@ -26,13 +26,15 @@ export const toggleVideoLike = asyncHandler(async (req, res, next) => {
       likedBy: userId,
     });
 
+    console.log(alreadyLiked);
+
     if (alreadyLiked) {
       const isUnLiked = await Like.deleteOne({
         video: videoId,
         likedBy: userId,
       });
 
-      if (!isUnLiked) {
+      if (isUnLiked) {
         await Video.updateOne({ _id: videoId }, { $inc: { likes: -1 } });
       }
 
@@ -49,6 +51,7 @@ export const toggleVideoLike = asyncHandler(async (req, res, next) => {
 
     return res.status(200).json(new ApiResponse(200, newLike, 'Like added'));
   } catch (error) {
+    console.error(error);  // Optional: Better logging for error tracking
     throw new ApiError(500, 'Internal server error');
   }
 });

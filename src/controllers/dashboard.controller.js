@@ -6,6 +6,9 @@ import { ApiError } from '../utilities/ApiError.js';
 import { ApiResponse } from '../utilities/ApiResponse.js';
 import { asyncHandler } from '../utilities/asyncHandler.js';
 
+
+// FIXME: Need to solve the issue with the like controller
+
 export const getChannelStats = asyncHandler(async (req, res) => {
 
   if (!req.user) {
@@ -56,46 +59,49 @@ export const getChannelStats = asyncHandler(async (req, res) => {
     }
   ]);
 
-  const totalLikes = await Like.aggregate([
-    {
-      $match: {
-        $or: [
-          {
-            vedio: { $exists: true },
-            'vedio.owner': userId
+  const videoLikes = await Like.aggregate(
+    [
+      {
+        $match: {
+          video: {
+            $exists: true,
           },
-          {
-            tweet: { $exists: true },
-            'tweet.owner': userId,
-          },
-          {
-            comment: { $exists: true },
-            'comment.owner': userId,
-          },
-        ],
+        },
       },
-    },
-    {
-      $group: {
-        _id: null,
-        likes: { $sum: 1 },
+      {
+        $lookup: {
+          from: "videos",
+          localField: "video",
+          foreignField: "_id",
+          as: "video",
+          pipeline: [
+            {
+              $project: {
+                _id: 0,
+                likes: 1,
+              },
+            },
+          ],
+        },
       },
-    },
-    {
-      $project: {
-        _id: 0,
-        likes: 1
-      }
-    }
-  ]);
-
-  
+      {
+        $unwind: {
+          path: "$video",
+        },
+      },
+      {
+        $project: {
+          video: 1,
+        },
+      },
+    ]
+)
 
   const info= {
     TotalViews: VedioDetail[0]?.totalViews || 0,
     TotalVideo: VedioDetail[0]?.totalVideo ||0,
     TotalSubscribers: totalSubscribers[0]?.subscriber || 0,
-    TotalLikes: totalLikes[0]?.likes || 0
+    TotalLikes: videoLikes[0]?.video.likes|| 0
   }
 
   return res.status(200).json(new ApiResponse(200, info, "Successfully get the channel stats"))
