@@ -5,7 +5,6 @@ import { ApiResponse } from '../utilities/ApiResponse.js';
 import { ApiError } from '../utilities/ApiError.js';
 import { asyncHandler } from '../utilities/asyncHandler.js';
 
-//FIXME: Need to solve the issue with the like controller
 
 export const toggleVideoLike = asyncHandler(async (req, res, next) => {
   const { videoId } = req.params;
@@ -51,7 +50,7 @@ export const toggleVideoLike = asyncHandler(async (req, res, next) => {
 
     return res.status(200).json(new ApiResponse(200, newLike, 'Like added'));
   } catch (error) {
-    console.error(error);  // Optional: Better logging for error tracking
+    // console.error(error); 
     throw new ApiError(500, 'Internal server error');
   }
 });
